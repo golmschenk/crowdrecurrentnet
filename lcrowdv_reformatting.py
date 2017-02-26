@@ -37,15 +37,12 @@ def data_directory_to_tfrecords(data_directory, output_directory):
     head_positions_directory = os.path.join(data_directory, 'csv')
     meta_file_written = False
     with tf.python_io.TFRecordWriter(tfrecords_path) as writer:
-        for index in range(len([name for name in os.listdir(images_directory) if
-                                os.path.isfile(os.path.join(images_directory, name))])):
-            image_file_path = os.path.join(images_directory, '{}.png'.format(index + 1))
-            if not os.path.exists(image_file_path):
-                continue
+        for index, file_name in enumerate([name for name in os.listdir(images_directory) if name.endswith('.png')]):
+            image_file_path = os.path.join(images_directory, file_name)
             pil_image = Image.open(image_file_path)
             pil_image.load()
             image = np.asarray(pil_image, dtype=np.uint8)[:, :, :3]
-            csv_file_path = os.path.join(head_positions_directory, '{}.csv'.format(index + 1))
+            csv_file_path = os.path.join(head_positions_directory, '{}.csv'.format(file_name[:-4]))
             head_positions = np.full(shape=(settings.max_head_count, settings.head_positions_width), fill_value=-1,
                                      dtype=np.int32)
             if os.path.getsize(csv_file_path) > 0:
@@ -67,4 +64,4 @@ def data_directory_to_tfrecords(data_directory, output_directory):
             print('\r{} frames written.'.format(index + 1), end='')
 
 
-data_directory_to_tfrecords('/Users/golmschenk/Downloads/p_hd_lpc_hp', '/Users/golmschenk/Desktop')
+data_directory_to_tfrecords('lcrowdv_micro', 'lcrowdv_micro')
