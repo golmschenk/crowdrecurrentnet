@@ -7,7 +7,7 @@ import reader
 import settings
 
 
-class SequenceGenerator:
+class ExampleGenerator:
     """
     A class for generating example sequences and adding them to the queue.
     """
