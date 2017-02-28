@@ -161,4 +161,6 @@ ENV/
 # Rope project settings
 .ropeproject
 
-/lcrowdv_micro/
+/data/lcrowdv_micro/
+/data/
+/logs/

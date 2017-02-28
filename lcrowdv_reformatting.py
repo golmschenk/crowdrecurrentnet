@@ -64,4 +64,4 @@ def data_directory_to_tfrecords(data_directory, output_directory):
             print('\r{} frames written.'.format(index + 1), end='')
 
 
-data_directory_to_tfrecords('lcrowdv_micro', 'lcrowdv_micro')
+data_directory_to_tfrecords('data/lcrowdv_micro', 'data/lcrowdv_micro')
