@@ -93,4 +93,5 @@ class ExampleGenerator:
         with tf.control_dependencies([step_to_next_frame_op]):
             examples = self.generate_examples_from_current_sequence()
             # examples = self.augment(examples)
+            examples = tf.cast(examples[0], dtype=tf.float32), tf.cast(examples[1], dtype=tf.float32)
             return examples
