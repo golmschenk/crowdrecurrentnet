@@ -1,5 +1,5 @@
 """
-Code for the recurrent neural network to estimate crowd flow.
+Code for generating the sequence examples.
 """
 import tensorflow as tf
 
@@ -31,7 +31,7 @@ class ExampleGenerator:
         removes the oldest frame.
 
         :return: The op to continue the sequence.
-        :rtype: tf.Op
+        :rtype: tf.Operation
         """
         image_tensor, head_positions = reader.read_single_image_and_head_positions_example(self.file_name_queue)
         expanded_image_tensor = tf.expand_dims(image_tensor, axis=0)
@@ -81,3 +81,16 @@ class ExampleGenerator:
         test = tf.while_loop(condition, body, [counter, image_sequence_patch_list, head_count_list], back_prop=False,
                              shape_invariants=shape_invariants)
         return test[1:]
+
+    def outputs(self):
+        """
+        Creates the output op for the generator.
+
+        :return: The op for the generator.
+        :rtype: tf.Operation
+        """
+        step_to_next_frame_op = self.step_to_next_frame()
+        with tf.control_dependencies([step_to_next_frame_op]):
+            examples = self.generate_examples_from_current_sequence()
+            # examples = self.augment(examples)
+            return examples
