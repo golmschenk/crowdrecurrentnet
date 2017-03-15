@@ -44,23 +44,34 @@ def test():
     """
     Runs a network for testing.
     """
-    if os.path.exists(os.path.join(settings.log_directory, 'test')):
-        shutil.rmtree(os.path.join(settings.log_directory, 'test'))
+    # Log prep.
+    test_log_directory = os.path.join(settings.log_directory, 'test')
+    if os.path.exists(test_log_directory):
+        shutil.rmtree(test_log_directory)
+
+    # Build graph.
+    file_name_queue = tf.train.string_input_producer(['data/lcrowdv_micro.tfrecords'], num_epochs=1)
+    examples = ExampleGenerator(file_name_queue).outputs()
+    image_sequences_tensor, head_counts_tensor = tf.train.batch(examples, batch_size=1, enqueue_many=True)
+    predicted = basic_convolution_inference(image_sequences_tensor)
+    loss_op = tf.reduce_mean(tf.square(predicted - head_counts_tensor))
+
+    # Restore prep.
     most_recent = os.listdir(settings.log_directory)[-1]
     checkpoint_path = tf.train.latest_checkpoint(os.path.join(settings.log_directory, most_recent))
-    images = tf.constant(0, shape=[10, 30, 30, 3])
-    labels = tf.constant(1, shape=[10])
-    saver = tf.train.import_meta_graph('{}.meta'.format(checkpoint_path), input_map={'images:0': images,
-                                                                                     'labels:0': labels}, name='import')
+    restore_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES))
+
     def load_model(session_):
-        saver.restore(session_, checkpoint_path)
-    supervisor = tf.train.Supervisor(logdir=os.path.join(settings.log_directory, 'test'), init_fn=load_model)
+        """Used to restore the model during supervisor initialization"""
+        restore_saver.restore(session_, checkpoint_path)
+
+    # Run test.
+    supervisor = tf.train.Supervisor(logdir=test_log_directory, init_fn=load_model)
     with supervisor.managed_session() as session:
-        training_op = session.graph.get_operation_by_name('input_producer')
-        loss_tensor = session.graph.get_tensor_by_name('Mean:0')
-        training_op = session.graph.get_operation_by_name('training_op')
-        for index in range(100):
-            _, loss = session.run([training_op, loss_tensor])
+        while True:
+            if supervisor.should_stop():
+                break
+            loss = session.run(loss_op)
             print(loss)
 
 
