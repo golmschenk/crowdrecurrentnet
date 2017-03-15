@@ -2,7 +2,7 @@
 Settings for the network.
 """
 
-run_mode = 'train'
+run_mode = 'test'
 
 log_directory = 'logs'
 

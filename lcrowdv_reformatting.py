@@ -53,7 +53,7 @@ def data_directory_to_tfrecords(data_directory, output_directory):
             image_raw = image.tostring()
             head_positions_raw = head_positions.tostring()
             features = {'image_raw': _bytes_feature(image_raw),
-                        'head_positions_raw': _bytes_feature(head_positions_raw)}
+                        'head_positions_raw': _bytes_feature(str(head_positions_raw))}
             example = tf.train.Example(features=tf.train.Features(feature=features))
             writer.write(example.SerializeToString())
             if not meta_file_written:
@@ -64,4 +64,5 @@ def data_directory_to_tfrecords(data_directory, output_directory):
             print('\r{} frames written.'.format(index + 1), end='')
 
 
-data_directory_to_tfrecords('data/lcrowdv_micro', 'data/lcrowdv_micro')
+if __name__ == '__main__':
+    data_directory_to_tfrecords('data/lcrowdv_micro', 'data/lcrowdv_micro')
